@@ -11,52 +11,56 @@ import 'datatables.net-fixedColumns-bs/css/fixedColumns.bootstrap.min.css';
 
 var dTable;
 
-$(function(){
-  let [colOrders, colTable] = [[], []];
+$(function () {
+  let colTable = [];
 
   if (localStorage.getItem('datatableCols')) {
     colTable = colStorage.fetch();
   } else {
-    $('.toggle-vis').each(function() {
+    $('.toggle-vis').each(function () {
       let dTableColumn = {
         title: upperFirst($(this).attr('id')),
         name: $(this).attr('id'),
-        visible: $(this).is(':checked')
+        visible: $(this).is(':checked'),
+        targets: $(this).attr('data-column-index')
       }
       colTable.push(dTableColumn);
     });
     colStorage.save(colTable);
   }
 
-  dTable = $('.table-datatable').DataTable(
-    {
-      ajax: './static/data.json',
-      columns: colTable,
-      // info: false,
-      // paging: false,
-      // ordering: false,
-      // searching: false,
-      scrollX: true,
-      scrollY: '300px',
-      scrollCollapse: false, // 如果没有使用 scrollY 属性，表示和表格数据同步，表格数据减少时，表格的高度也跟着减少
-      retrieve: true, // 如果已经初始化了，则继续使用之前的 Datatables 实例
-      select: 'single',
-      fixedColumns: {
-        leftColumns: 0,
-        rightColumns: 1
-      }
+  dTable = $('.table-datatable').DataTable({
+    ajax: './static/data.json',
+    columns: colTable,
+    // info: false,
+    // paging: false,
+    // ordering: false,
+    // searching: false,
+    scrollX: true,
+    scrollY: '300px',
+    scrollCollapse: false, // 如果没有使用 scrollY 属性，表示和表格数据同步，表格数据减少时，表格的高度也跟着减少
+    retrieve: true, // 如果已经初始化了，则继续使用之前的 Datatables 实例
+    select: 'single',
+    fixedColumns: {
+      leftColumns: 0,
+      rightColumns: 1
     }
-  )
+  })
 
-  $('.toggle-vis').on('change', function(e) {
+  $('.toggle-vis').on('change', function (e) {
     let colVisible = [];
     e.stopPropagation();
     let column = dTable.column($(this).attr('id') + ':name');
     column.visible(!column.visible());
-    $('.toggle-vis').each(function(index) {
-      colVisible.push({'name': $(this).attr('id'), 'checked': $(this).is(':checked')})
+    $('.toggle-vis').each(function () {
+      colVisible.push({
+        title: upperFirst($(this).attr('id')),
+        name: $(this).attr('id'),
+        visible: $(this).is(':checked'),
+        targets: $(this).attr('data-column-index')
+      })
     })
-    localStorage.setItem('colVisible', JSON.stringify(colVisible));
+    colStorage.save(colVisible);
   })
 });
 window.onresize = function () {
@@ -72,14 +76,14 @@ function upperFirst(str) {
 }
 
 var colStorage = {
-  fetch: function() {
+  fetch: function () {
     var cols = JSON.parse(localStorage.getItem('datatableCols') || '[]');
-    cols.forEach(function(col, index) {
-      col.targets = index;
+    cols.forEach(function (col, index) {
+      document.querySelectorAll('.toggle-vis')[index].checked = col.visible
     });
     return cols;
   },
-  save: function(cols) {
+  save: function (cols) {
     localStorage.setItem('datatableCols', JSON.stringify(cols))
   }
 }
