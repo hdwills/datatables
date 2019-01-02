@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+</head>
+
+<body>
+  <div id="app">
+    <data-table v-if="list !== null" :head="list.head" :data="list.body"></data-table>
+  </div>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.25/vue.min.js"></script>
+  <script>
+    const mockData = {
+      head: [{
+          title: 'Name'
+        },
+        {
+          title: 'Position'
+        }
+      ],
+      body: [
+        [
+          'Tiger Nixon', 'System Architect'
+        ],
+        [
+          'Garrett Winters', 'Accountant'
+        ]
+      ]
+    }
+
+    Vue.component('data-table', {
+      props: [
+        'head', 'data'
+      ],
+      template: '<table></table>',
+      data() {
+        return {
+          instance: null
+        }
+      },
+      // watch: {
+      //   data: function(newDate) {
+      //     if(this.instance) {
+      //       this.instance.clear();
+      //       this.instance.rows.add(newDate);
+      //       this.instance.draw();
+      //     }
+      //   }
+      // },
+      ready() {
+        this.instance = $(this.$el).dataTable({
+          columns: this.head,
+          data: this.data
+        }).api()
+      }
+    })
+
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          list: null
+        }
+      },
+      methods: {
+        fetch() {
+          setTimeout(() => {
+            this.list = mockData;
+          }, 500)
+        }
+      },
+      ready() {
+        this.fetch()
+      }
+    })
+  </script>
+</body>
+
+</html>
